@@ -57,6 +57,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       _buildEmailField(),
                       _buildPassField(),
                       _buildLoginBtn(),
+                      const Divider(
+                        color: Colors.black,
+                        height: 10,
+                        thickness: 1,
+                        indent: 10,
+                        endIndent: 10,
+                      ),
                       _buildOtherAuth(),
                       _buildRegisterRow(context)
                     ],
@@ -195,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: RaisedButton(
             onPressed: () => _onLogin(),
             child: Text(
-              'Sign In'
+              'Sign In'.toUpperCase()
             ),
           ),
         )
@@ -203,15 +210,31 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildOtherAuth() {
-    return Column(
-      children: [
-        RaisedButton(
-          onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginDynamicScreen())),
-          child: Text(
-            'Login with Dynamic link'
-          ),
+    return Padding(
+      padding: const EdgeInsets.only(
+        left: 0,
+        top: 24,
+        right: 0,
+        bottom: 6
+      ),
+      child: Center(
+        child: Column(
+          children: [
+            RaisedButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginDynamicScreen())),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.phone_android),
+                  SizedBox(width: 10),
+                  Text('Login with Dynamic link'.toUpperCase()),
+                ],
+              )
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
