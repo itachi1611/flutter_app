@@ -3,8 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/custom/custom_inherited_widget.dart';
 import 'package:flutter_app/ui/login_screen.dart';
+import 'package:flutter_app/ui/snackbar/snackbar_screen.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn googleSignIn = GoogleSignIn();
 
 class HomeScreen extends StatefulWidget {
   final Widget child;
@@ -26,104 +29,119 @@ class _HomeScreenState extends State<HomeScreen> {
     return SafeArea(
       top: false,
       child: Scaffold(
-          key: _scaffoldKey,
-          floatingActionButton: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                margin: EdgeInsets.symmetric(
-                    vertical: 2,
-                    horizontal: 4
-                ),
-                child: FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () => _decrementCounter(),
-                  child: Icon(
-                      Icons.remove
-                  ),
-                ),
+        key: _scaffoldKey,
+        floatingActionButton: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.symmetric(
+                  vertical: 2,
+                  horizontal: 4
               ),
-              Container(
-                margin: EdgeInsets.symmetric(
-                    vertical: 2,
-                    horizontal: 4
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SnackBarScreen()));
+                },
+                child: Icon(
+                    Icons.message
                 ),
-                child: FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () => _incrementCounter(),
-                  child: Icon(
-                    Icons.add,
-                  ),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(
-                    vertical: 2,
-                    horizontal: 4
-                ),
-                child: FloatingActionButton(
-                  heroTag: null,
-                  onPressed: () => {},
-                  child: Icon(
-                      Icons.update
-                  ),
-                ),
-              ),
-            ],
-          ),
-          appBar: AppBar(
-            title: Text(
-                'Home'
-            ),
-            centerTitle: true,
-            leading: GestureDetector(
-              onTap: ()  async {
-                final User user = _auth.currentUser;
-                if (user != null) {
-                  await _auth.signOut();
-                  _scaffoldKey.currentState.showSnackBar(SnackBar(
-                    content: Text(user.uid + ' has successfully signed out.'),
-                  ));
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
-                }
-              },
-              child: Icon(
-                Icons.exit_to_app,
               ),
             ),
-            flexibleSpace: null,
-            bottom: null,
-            actions: [
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 4,
-                ),
-                child: GestureDetector(
-                  onTap: () => _selectDate(context),
-                  child: Icon(
-                    Icons.date_range,
-                  ),
+            Container(
+              margin: EdgeInsets.symmetric(
+                  vertical: 2,
+                  horizontal: 4
+              ),
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () => _decrementCounter(),
+                child: Icon(
+                    Icons.remove
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: 4
-                ),
-                child: GestureDetector(
-                  onTap: () => print('Redirect'),
-                  child: Icon(
-                    Icons.perm_contact_calendar,
-                  ),
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(
+                  vertical: 2,
+                  horizontal: 4
+              ),
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () => _incrementCounter(),
+                child: Icon(
+                  Icons.add,
                 ),
               ),
-            ],
+            ),
+            Container(
+              margin: EdgeInsets.symmetric(
+                  vertical: 2,
+                  horizontal: 4
+              ),
+              child: FloatingActionButton(
+                heroTag: null,
+                onPressed: () => {},
+                child: Icon(
+                    Icons.update
+                ),
+              ),
+            ),
+          ],
+        ),
+        appBar: AppBar(
+          title: Text(
+              'Home'
           ),
-          body: CustomInheritedWidget(
-            widget: widget.child,
-            data: _counter,
-            date: '${_today.toLocal()}'.split(' ')[0],
-          )
+          centerTitle: true,
+          leading: GestureDetector(
+            onTap: ()  async {
+              final User user = _auth.currentUser;
+              if (user != null) {
+                await _auth.signOut();
+                _scaffoldKey.currentState.showSnackBar(SnackBar(
+                  content: Text(user.uid + ' has successfully signed out.'),
+                ));
+                Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()));
+              }
+            },
+            child: Icon(
+              Icons.exit_to_app,
+            ),
+          ),
+          flexibleSpace: null,
+          bottom: null,
+          actions: [
+            Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: 4,
+              ),
+              child: GestureDetector(
+                onTap: () => _selectDate(context),
+                child: Icon(
+                  Icons.date_range,
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(
+                  horizontal: 4
+              ),
+              child: GestureDetector(
+                onTap: () => print('Redirect'),
+                child: Icon(
+                  Icons.perm_contact_calendar,
+                ),
+              ),
+            ),
+          ],
+        ),
+        body: CustomInheritedWidget(
+          widget: widget.child,
+          data: _counter,
+          date: '${_today.toLocal()}'.split(' ')[0],
+        ),
       ),
     );
   }

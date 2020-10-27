@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/extension/app_theme_data.dart';
-import 'package:flutter_app/ui/home_screen.dart';
+import 'package:flutter_app/ui/home/home_screen.dart';
 import 'package:flutter_app/ui/login_screen.dart';
 import 'package:flutter_app/ui/widget/center_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';

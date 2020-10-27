@@ -2,21 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-final FirebaseAuth _auth = FirebaseAuth.instance;
-
-class LoginDynamicScreen extends StatefulWidget {
+class VerifyScreen extends StatefulWidget {
   final url = 'https://static-s.aa-cdn.net/img/ios/1458332586/7bc3cad5b2658f9bfdcdd4a8899c2d0b?v=1';
 
   @override
-  _LoginDynamicScreenState createState() => _LoginDynamicScreenState();
+  _VerifyScreenState createState() => _VerifyScreenState();
 }
 
-class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBindingObserver {
+class _VerifyScreenState extends State<VerifyScreen> with WidgetsBindingObserver {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final _emailController = TextEditingController();
+  final _codeController = TextEditingController();
 
   @override
   void initState() {
@@ -30,7 +28,11 @@ class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBin
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          'Login'
+            'Login'
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
         ),
       ),
       key: _scaffoldKey,
@@ -87,7 +89,7 @@ class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBin
           ),
           TextFormField(
             textInputAction: TextInputAction.next,
-            controller: _emailController,
+            controller: _codeController,
             obscureText: false,
             cursorColor: Colors.pink[300],
             keyboardType: TextInputType.emailAddress,
@@ -103,10 +105,10 @@ class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBin
                     Icons.clear
                 ),
                 tooltip: 'Clear email',
-                onPressed: () => _emailController.clear(),
+                onPressed: () => _codeController.clear(),
               ),
             ),
-            validator: (value) => _validateEmail(value),
+            //validator: (value) => {},
             //onSaved: (value) => _saveEmail(value),
           ),
         ],
@@ -124,7 +126,7 @@ class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBin
         ),
         child: Center(
           child: RaisedButton(
-            onPressed: () => _onLogin(),
+            onPressed: () => _onActiveEmail(),
             child: Text(
                 'Sign In'
             ),
@@ -133,48 +135,20 @@ class _LoginDynamicScreenState extends State<LoginDynamicScreen> with WidgetsBin
     );
   }
 
-  String _validateEmail(String email) {
-    if(email.isEmpty) {
-      return 'Please enter email';
+  void _onActiveEmail() async {
+    FirebaseAuth _auth = FirebaseAuth.instance;
+    String _code = _codeController.text.toString().trim();
+    try{
+      await _auth.checkActionCode(_code);
+      await _auth.applyActionCode(_code);
+
+      //Reload the user if success
+      _auth.currentUser.reload();
+    } on FirebaseAuthException catch (e) {
+      if(e.code == 'invalid-action-code') {
+        print('The code is invalid.');
+      }
     }
 
-    Pattern pattern = r'^([a-zA-Z0-9_.]{1,32}@[a-zA-Z0-9-_,.]{2,}(\.[a-zA-Z0-9-_,.]{2,})+)$';
-    RegExp regex = new RegExp(pattern);
-    if(!regex.hasMatch(email)) {
-      return 'Email not right format';
-    }
-    return null;
-  }
-
-  Future<void> _onLogin() async {
-    if(_formKey.currentState.validate()) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return Center(child: CircularProgressIndicator());
-        }
-      );
-
-      await _auth.sendSignInLinkToEmail(
-          email: _emailController.text,
-          actionCodeSettings: ActionCodeSettings(
-            url: 'https://flutterapp1.page.link',
-            handleCodeInApp: true,
-            iOSBundleId: 'com.fox.flutter_app',
-            androidPackageName: 'com.fox.flutter_app',
-            androidInstallApp: true,
-            androidMinimumVersion: '1'
-          )
-      );
-    } else {
-      print('Can not validate user information');
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 }

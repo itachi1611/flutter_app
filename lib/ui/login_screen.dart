@@ -3,13 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/extension/app_flush_bar.dart';
 import 'package:flutter_app/model/dialog_type.dart';
-import 'package:flutter_app/ui/home_screen.dart';
+import 'package:flutter_app/ui/home/home_screen.dart';
 import 'package:flutter_app/ui/login_dynamic_screen.dart';
 import 'package:flutter_app/ui/register_screen.dart';
+import 'package:flutter_app/ui/verify_screen.dart';
 import 'package:flutter_app/ui/widget/center_widget.dart';
+import 'package:flutter_app/utlis/field_validator.dart';
+import 'package:github_sign_in/github_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final FirebaseAuth _auth = FirebaseAuth.instance;
+final GoogleSignIn googleSignIn = GoogleSignIn();
 
 class LoginScreen extends StatefulWidget {
   final url = 'https://static-s.aa-cdn.net/img/ios/1458332586/7bc3cad5b2658f9bfdcdd4a8899c2d0b?v=1';
@@ -42,37 +47,39 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       key: _scaffoldKey,
-      body: SafeArea(
-        maintainBottomViewPadding: true,
-        child: Stack(
-          children: [
-            Column(
+      body: SingleChildScrollView(
+        child: SafeArea(
+            maintainBottomViewPadding: true,
+            child: Stack(
               children: [
-                _buildLogo(),
-                Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildEmailField(),
-                      _buildPassField(),
-                      _buildLoginBtn(),
-                      const Divider(
-                        color: Colors.black,
-                        height: 10,
-                        thickness: 1,
-                        indent: 10,
-                        endIndent: 10,
+                Column(
+                  children: [
+                    _buildLogo(),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildEmailField(),
+                          _buildPassField(),
+                          _buildLoginBtn(),
+                          const Divider(
+                            color: Colors.black,
+                            height: 10,
+                            thickness: 1,
+                            indent: 10,
+                            endIndent: 10,
+                          ),
+                          _buildSocialAuth(),
+                          _buildRegisterRow(context)
+                        ],
                       ),
-                      _buildOtherAuth(),
-                      _buildRegisterRow(context)
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        )
+            )
+        ),
       ),
     );
   }
@@ -128,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () => _emailController.clear(),
               ),
             ),
-            validator: (value) => _validateEmail(value),
+            validator: (value) => FieldValidator.validateEmail(value),
             //onSaved: (value) => _saveEmail(value),
           ),
         ],
@@ -182,7 +189,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 )
             ),
-            validator: (value) => _validatePass(value),
+            validator: (value) => FieldValidator.validatePass(value),
             //onSaved: (value) => _savePass(value),
           ),
         ],
@@ -209,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildOtherAuth() {
+  Widget _buildSocialAuth() {
     return Padding(
       padding: const EdgeInsets.only(
         left: 0,
@@ -218,21 +225,87 @@ class _LoginScreenState extends State<LoginScreen> {
         bottom: 6
       ),
       child: Center(
-        child: Column(
-          children: [
-            RaisedButton(
-              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginDynamicScreen())),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.phone_android),
-                  SizedBox(width: 10),
-                  Text('Login with Dynamic link'.toUpperCase()),
-                ],
-              )
-            ),
-          ],
+        child: Container(
+          width: 300,
+          child: Column(
+            children: [
+              RaisedButton(
+                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginDynamicScreen())),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(40),
+                      side: BorderSide(color: Colors.grey)
+                  ),
+                  highlightElevation: 0,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Icon(Icons.phone_android),
+                      SizedBox(width: 10),
+                      Text('Login with Dynamic link'),
+                    ],
+                  )
+              ),
+              RaisedButton(
+                onPressed: () {
+                  _loginWithGoogle().then((res) {
+                    if (res != null) {
+                      Future.delayed(const Duration(seconds: 5), () {
+                        AppFlushBar.showFlushBar(context, type: DialogType
+                            .SUCCESS, message: 'Login success');
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) =>
+                                HomeScreen(child: CenterWidget())));
+                      });
+                    }
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: BorderSide(color: Colors.grey)
+                ),
+                highlightElevation: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Image(image: AssetImage('assets/images/google_logo.png'), height: 25,),
+                    SizedBox(width: 10,),
+                    Text('Sign in with Google')
+                  ],
+                ),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  _signInWithGithub().then((res) {
+                    if(res != null) {
+                      Future.delayed(const Duration(seconds: 5), () {
+                        AppFlushBar.showFlushBar(context, type: DialogType
+                            .SUCCESS, message: 'Login success');
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
+                            builder: (context) =>
+                                HomeScreen(child: CenterWidget())));
+                      });
+                    }
+                  });
+                },
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(40),
+                    side: BorderSide(color: Colors.grey)
+                ),
+                highlightElevation: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Image(image: AssetImage('assets/images/github_logo.png'), height: 25),
+                    SizedBox(width: 10,),
+                    Text('Sign in with Github')
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -277,27 +350,60 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  String _validateEmail(String email) {
-    if(email.isEmpty) {
-      return 'Please enter email';
-    }
+  Future<String> _loginWithGoogle() async {
+    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication;
+    final AuthCredential credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken
+    );
 
-    Pattern pattern = r'^([a-zA-Z0-9_.]{1,32}@[a-zA-Z0-9-_,.]{2,}(\.[a-zA-Z0-9-_,.]{2,})+)$';
-    RegExp regex = new RegExp(pattern);
-    if(!regex.hasMatch(email)) {
-      return 'Email not right format';
+    final UserCredential authResult = await _auth.signInWithCredential(credential);
+    final User user = authResult.user;
+
+
+    if(user != null) {
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
+
+      final User currentUser = _auth.currentUser;
+      assert(user.uid == currentUser.uid);
+
+      print('loginWithGoogle succeeded : $user');
+      return '$user';
     }
     return null;
   }
 
-  String _validatePass(String pass) {
-    if(pass.isEmpty) {
-      return 'Please enter password';
-    }
-    if(pass.length < 5 || pass.length > 10) {
-      return 'Password must be 5 to 10 characters';
+  Future<String> _signInWithGithub() async {
+    // Create a GitHubSignIn instance
+    final GitHubSignIn gitHubSignIn = GitHubSignIn(
+      clientId: 'af1a1c6c537745490053',
+      clientSecret: '302a57b6fcec32777d6f274462e912dd2fc3d914',
+      redirectUrl: 'https://fox-flutter.firebaseapp.com/__/auth/handler'
+    );
+    // Trigger the sign-in flow
+    final result = await gitHubSignIn.signIn(context);
+    // Create a credential from the access token
+    final AuthCredential authCredential = GithubAuthProvider.credential(result.token);
+    // Once signed in, return the UserCredential
+    final UserCredential authResult = await _auth.signInWithCredential(authCredential);
+    final User user = authResult.user;
+
+    if(user != null) {
+      assert(!user.isAnonymous);
+      assert(await user.getIdToken() != null);
+
+      final User currentUser = _auth.currentUser;
+      print('loginWithGithub : $user');
+      return '$user';
     }
     return null;
+  }
+
+  void _signOutGoogle() async {
+    await googleSignIn.signOut();
+    print('User signed out');
   }
 
   void _onLogin() async {
@@ -309,26 +415,52 @@ class _LoginScreenState extends State<LoginScreen> {
           }
       );
 
-      await _auth.signInWithEmailAndPassword(email: _emailController.text, password: _passController.text).then((res) {
-        if(res != null) {
+      try {
+        await _auth.signInWithEmailAndPassword(email: _emailController.text, password: _passController.text).then((res) {
+          if(res != null) {
+            Navigator.pop(context);
+            _saveUserAfterSignIn(res.user);
+            if(!res.user.emailVerified) {
+              res.user.sendEmailVerification();
+              Future.delayed(const Duration(seconds : 5), () {
+                AppFlushBar.showFlushBar(context, type: DialogType.INFO, message: 'PThe verification code has been sent to ${res.user.email}');
+
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                        builder: (context) => VerifyScreen()
+                    )
+                ).then((_) {
+                  _formKey.currentState?.reset();
+                });
+              });
+            } else {
+              Future.delayed(const Duration(seconds : 5), () {
+                AppFlushBar.showFlushBar(context, type: DialogType.SUCCESS, message: 'Login success');
+                Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                        builder: (context) => HomeScreen(child: CenterWidget())
+                    )
+                ).then((_) {
+                  _formKey.currentState?.reset();
+                });
+              });
+            }
+
+          }
+        }, onError: (err) {
           Navigator.pop(context);
-          _saveUserAfterSignIn(res.user);
-          Future.delayed(const Duration(seconds : 5), () {
-            AppFlushBar.showFlushBar(context, type: DialogType.SUCCESS, message: 'Login success');
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => HomeScreen(child: CenterWidget())
-              )
-            ).then((_) {
-              _formKey.currentState?.reset();
-            });
-          });
+          print(err);
+          AppFlushBar.showFlushBar(context, type: DialogType.ERROR, message: err.toString());
+        });
+      } on FirebaseAuthException catch(e) {
+        if(e.code == 'user-not-found') {
+          print('No user found for that email.');
+        } else if(e.code == 'wrong-password') {
+          print('Wrong password provided for that user');
         }
-      }, onError: (err) {
-        Navigator.pop(context);
-        print(err);
-        AppFlushBar.showFlushBar(context, type: DialogType.ERROR, message: err.toString());
-      });
+      } catch(e) {
+        print(e);
+      }
 
       //_formKey.currentState.save();
 

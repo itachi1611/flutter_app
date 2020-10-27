@@ -283,24 +283,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       );
 
-      await _auth.createUserWithEmailAndPassword(email: _emailController.text.toString().trim(), password: _passController.text.toString().trim()).then((res){
-        if(res != null) {
-          Navigator.pop(context);
-          Future.delayed(const Duration(seconds: 5), () {
-            AppFlushBar.showFlushBar(context, type: DialogType.SUCCESS, message: 'Register success');
-            Navigator.of(context)
-                .pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()))
-                .then((_) {
-              _formKey.currentState?.reset();
+      try{
+        await _auth.createUserWithEmailAndPassword(email: _emailController.text.toString().trim(), password: _passController.text.toString().trim()).then((res){
+          if(res != null) {
+            Navigator.pop(context);
+            Future.delayed(const Duration(seconds: 5), () {
+              AppFlushBar.showFlushBar(context, type: DialogType.SUCCESS, message: 'Register success');
+              Navigator.of(context)
+                  .pushReplacement(MaterialPageRoute(builder: (context) => LoginScreen()))
+                  .then((_) {
+                _formKey.currentState?.reset();
+              });
             });
-          });
 
+          }
+        }, onError: (err) {
+          Navigator.pop(context);
+          print(err);
+          AppFlushBar.showFlushBar(context, type: DialogType.ERROR, message: err.toString());
+        });
+      } on FirebaseAuthException catch(e) {
+        if(e.code == 'weak-password') {
+          print('The password provided is too weak.');
+        } else if(e.code == 'email-already-in-use') {
+          print('The account already exists for that email.');
         }
-      }, onError: (err) {
-        Navigator.pop(context);
-        print(err);
-        AppFlushBar.showFlushBar(context, type: DialogType.ERROR, message: err.toString());
-      });
+      } catch(e) {
+        print(e);
+      }
 
 
     } else {

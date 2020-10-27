@@ -1,0 +1,4 @@
+enum HomeEvent {
+  eventHome,
+  eventSnack
+}

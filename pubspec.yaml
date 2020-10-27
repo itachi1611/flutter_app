@@ -28,6 +28,9 @@ dependencies:
   firebase_auth: ^0.18.1+2
   firebase_dynamic_links: ^0.6.0+2
   firebase_database: ^4.1.1
+  google_sign_in: ^4.5.5
+  github_sign_in: ^0.0.1
+  firebase_messaging: ^7.0.3
 
   cached_network_image: ^2.3.2+1
   path_provider: ^1.6.21
@@ -35,6 +38,9 @@ dependencies:
   splashscreen: ^1.2.0
   shared_preferences: ^0.5.12+2
   flushbar: ^1.10.4
+
+  bloc: ^6.0.0
+  flutter_bloc: ^6.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -58,6 +64,8 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/ic_logo.png
+    - assets/images/google_logo.png
+    - assets/images/github_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
