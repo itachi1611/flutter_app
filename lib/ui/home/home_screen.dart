@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/custom/custom_inherited_widget.dart';
-import 'package:flutter_app/ui/login_screen.dart';
+import 'package:flutter_app/ui/auth/login/login_screen.dart';
 import 'package:flutter_app/ui/snackbar/snackbar_screen.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 

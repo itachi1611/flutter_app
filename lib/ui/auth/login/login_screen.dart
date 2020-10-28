@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/extension/app_flush_bar.dart';
 import 'package:flutter_app/model/dialog_type.dart';
 import 'package:flutter_app/ui/home/home_screen.dart';
-import 'package:flutter_app/ui/login_dynamic_screen.dart';
-import 'package:flutter_app/ui/register_screen.dart';
-import 'package:flutter_app/ui/verify_screen.dart';
+import 'package:flutter_app/ui/auth/login_dynamic/login_dynamic_screen.dart';
+import 'package:flutter_app/ui/auth/register/register_screen.dart';
+import 'package:flutter_app/ui/auth/verification/verify_screen.dart';
 import 'package:flutter_app/ui/widget/center_widget.dart';
 import 'package:flutter_app/utlis/field_validator.dart';
 import 'package:github_sign_in/github_sign_in.dart';
@@ -49,36 +49,28 @@ class _LoginScreenState extends State<LoginScreen> {
       key: _scaffoldKey,
       body: SingleChildScrollView(
         child: SafeArea(
-            maintainBottomViewPadding: true,
-            child: Stack(
-              children: [
-                Column(
-                  children: [
-                    _buildLogo(),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildEmailField(),
-                          _buildPassField(),
-                          _buildLoginBtn(),
-                          const Divider(
-                            color: Colors.black,
-                            height: 10,
-                            thickness: 1,
-                            indent: 10,
-                            endIndent: 10,
-                          ),
-                          _buildSocialAuth(),
-                          _buildRegisterRow(context)
-                        ],
-                      ),
+          maintainBottomViewPadding: true,
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  _buildLogo(),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildEmailField(),
+                        _buildPassField(),
+                        _buildLoginBtn(),
+                        _buildRegisterRow(context)
+                      ],
                     ),
-                  ],
-                ),
-              ],
-            )
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -213,101 +205,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         )
-    );
-  }
-
-  Widget _buildSocialAuth() {
-    return Padding(
-      padding: const EdgeInsets.only(
-        left: 0,
-        top: 24,
-        right: 0,
-        bottom: 6
-      ),
-      child: Center(
-        child: Container(
-          width: 300,
-          child: Column(
-            children: [
-              RaisedButton(
-                  onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => LoginDynamicScreen())),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(40),
-                      side: BorderSide(color: Colors.grey)
-                  ),
-                  highlightElevation: 0,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Icon(Icons.phone_android),
-                      SizedBox(width: 10),
-                      Text('Login with Dynamic link'),
-                    ],
-                  )
-              ),
-              RaisedButton(
-                onPressed: () {
-                  _loginWithGoogle().then((res) {
-                    if (res != null) {
-                      Future.delayed(const Duration(seconds: 5), () {
-                        AppFlushBar.showFlushBar(context, type: DialogType
-                            .SUCCESS, message: 'Login success');
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) =>
-                                HomeScreen(child: CenterWidget())));
-                      });
-                    }
-                  });
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    side: BorderSide(color: Colors.grey)
-                ),
-                highlightElevation: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Image(image: AssetImage('assets/images/google_logo.png'), height: 25,),
-                    SizedBox(width: 10,),
-                    Text('Sign in with Google')
-                  ],
-                ),
-              ),
-              RaisedButton(
-                onPressed: () {
-                  _signInWithGithub().then((res) {
-                    if(res != null) {
-                      Future.delayed(const Duration(seconds: 5), () {
-                        AppFlushBar.showFlushBar(context, type: DialogType
-                            .SUCCESS, message: 'Login success');
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) =>
-                                HomeScreen(child: CenterWidget())));
-                      });
-                    }
-                  });
-                },
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(40),
-                    side: BorderSide(color: Colors.grey)
-                ),
-                highlightElevation: 0,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Image(image: AssetImage('assets/images/github_logo.png'), height: 25),
-                    SizedBox(width: 10,),
-                    Text('Sign in with Github')
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

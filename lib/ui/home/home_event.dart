@@ -1,4 +1,0 @@
-enum HomeEvent {
-  eventHome,
-  eventSnack
-}

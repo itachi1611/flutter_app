@@ -2,10 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/extension/app_theme_data.dart';
+import 'package:flutter_app/helper/shared_preference_helper.dart';
+import 'package:flutter_app/ui/auth/auth_screen.dart';
 import 'package:flutter_app/ui/home/home_screen.dart';
-import 'package:flutter_app/ui/login_screen.dart';
 import 'package:flutter_app/ui/widget/center_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_app/utlis/app_images.dart';
 import 'package:splashscreen/splashscreen.dart';
 
 Future<void> main() async {
@@ -20,14 +21,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-
   User _user;
 
   @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
-    _saveUser(_user);
+
+    if(_user != null) {
+      SharedPreferenceHelper.setAccount(_user);
+    }
+
     print(_user);
   }
 
@@ -38,10 +42,10 @@ class _MyAppState extends State<MyApp> {
       theme: AppThemeData().materialTheme,
       home: SplashScreen(
         seconds: 5,
-        navigateAfterSeconds: (_user != null) ? HomeScreen(child: CenterWidget()) : LoginScreen(),
+        navigateAfterSeconds: (_user != null) ? HomeScreen(child: CenterWidget()) : AuthScreen(),
         //title: ,
         image: Image.asset(
-          'assets/images/ic_logo.png',
+          AppImages.icLogo,
           width: 150,
           height: 150,
         ),
@@ -52,10 +56,5 @@ class _MyAppState extends State<MyApp> {
         loaderColor: Colors.pink[500],
       ),
     );
-  }
-
-  void _saveUser(User user) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("user", user.toString());
   }
 }
